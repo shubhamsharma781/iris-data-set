@@ -1,0 +1,144 @@
+---
+title: "IRIS DATA SET PREDICTION"
+author: "SHUBHAM SHARMA"
+date: "June 10, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prediction on Iris data set
+
+This project is based on the prediction of flower class based on avilable attributes in iris data set.
+You can get iris data set in the following link  <https://archive.ics.uci.edu/ml/datasets/Iris>
+
+To view the data set simply use command
+```{r results='hide'}
+View(iris)
+```
+
+You can also see no. of rows and collumn in this data set using
+```{r}
+dim(iris)
+```
+
+To know about the data set use command
+```{r cars}
+summary(iris)
+```
+
+Now divide the data set into 2 parts -
+- training
+- testing
+
+Build all your model fit on training set and do prediction on testing set.
+
+For dividing the data set into 2 parts ,"caret",package is required .
+If you don't have it , first install it, using command
+install.packages("caret")
+
+Now to use that package load it,by using command
+```{r}
+library(caret)
+```
+
+Now you can divide the data set into 2 parts(i.e training and testing),by using createDataPartition() function, which is available in caret package,so use command
+```{r}
+intrain <- createDataPartition(y = iris$Species,p = 0.7,list = FALSE)
+```
+
+This command says that intrain variable contains 70% of rows of iris data. 
+
+Now use command
+```{r}
+training <- iris[intrain,]
+testing <- iris[-intrain,]
+```
+
+This command says that training data set will contain rows that were in intrain variable, and testing data set will contain rows that were not in intrain variable.
+
+So our training data set will contain 70% of our original data and testing data set will contain 30% of our data.
+
+To view training and testing data set , use command
+```{r results='hide'}
+View(training)
+View(testing)
+```
+
+To see no. of rows in the training and testing data set use
+```{r}
+dim(training)
+```
+```{r}
+dim(testing)
+```
+
+## MODEL FITTING
+
+For model fiiting we will use "tree classification" algorithm.For this we will use train() function which is available in caret package.Use command
+```{r}
+modfit <- train(Species~.,method = "rpart",data = training)
+print(modfit$finalModel)
+```
+
+method = "rpart" says that we are using tree classifaction and data = training says that we are applying this on training data set.
+
+modelfit$finalModel will display the details of our model fit.
+
+### PLOT
+ 
+Now to have a good plot of our above fitting , install package "rattle",using command
+install.packages("rattle")
+
+
+Now load that package using command 
+```{r}
+library(rattle)
+```
+
+Now for plotting use function fancyRpartPlot() which is available in rattle package,so use command
+
+```{r}
+fancyRpartPlot(modfit$finalModel,main = "classfication tree")
+```
+
+From the plot and the print(modfit$finalModel) command we saw that the root node is of Species and then the first classification is based on Petal.Length , if Petal.Length < 2.4 then the species will be setosa with a probability of 1.
+And if Petosa.Length > 2.4 then there are 50% chances of versicolor and 50% chances of virginica.
+Our next classification is based on Petal.Width , if Petal.Width < 1.8 then the species will be versicolor with the probability 0.89 and virginica with the probability 0.11,
+if Petal.Width > 1.8 then the species will be versicolor with probability 0.03 and virginica with probability 0.97 
+
+## PREDICTION
+
+Now for predicting we will use testing data set and apply same model fitting that we made on training data set.
+For predicting we will use predict() function.So we will use command 
+```{r}
+pred <- predict(modfit,testing)
+```
+ 
+This will apply modfit on testing data set and will predict the Species in testing data set.
+
+Now you can make a table of original values and predicted values using command
+```{r}
+table(pred,testing$Species)
+```
+
+### PLOT
+
+To have a plot of how correctly you predicted you can use command
+```{r}
+testing$predright <- pred == testing$Species
+qplot(Petal.Width,Petal.Length,color = predright,data = testing)
+```
+
+Here we made a new variable in testing data set called predright which contains logical values TRUE or FALSE depending on whether our predicted and original values are same or not.
+
+From the plot and the table of predictions , you observe that most of our predictions were right.
+
+
+
+
+
+
+
